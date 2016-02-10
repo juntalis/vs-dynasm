@@ -29,9 +29,12 @@ definitions when more than one file includes dasm\_proto.h.
 
 **Special MsBuild Properties:**
 
-`DASMLuaPath` - Defines the absolute filepath to the lua executable used in running dynasm. (By default, this uses the minilua executable included with this repo) 
+`DASMLuaPath` - Defines the absolute filepath to the lua executable used in running dynasm. (By default, this uses the minilua executable included with this repo)
+
 `DynASMDir` - Defines the absolute filepath to the directory containing dynasm.lua. (By default, this uses the luajit\dynasm included in this repo) If this is not defined, but `DynASMPath` is, it will use the parent directory. This property is required if you want the DynASM headers automatically added to your include search path.
+
 `DynASMPath` - Defines the absolute filepath of the dynasm.lua script. (By default, this uses `$(DynASMDir)\dynasm.lua`, assuming $(DynASMDir) contains a value)
+
 `VsDynASMPath` - Optional property defining the absolute filepath to the vsdynasm executable, which is not used or defined by default. (vsdynasm.exe turned out to be redundant for *reasons*) If this is defined, it will be used to run dynasm. If not, the lua executable and dynasm script path from the properties above will be used.
 
 ## Other Stuff
