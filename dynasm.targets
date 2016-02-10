@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<PropertyPageSchema Include="$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml" />
+		<AvailableItemName Include="DASM">
+			<Targets>_DASM</Targets>
+		</AvailableItemName>
+	</ItemGroup>
+	<PropertyGroup>
+		<ComputeCompileInputsTargets>
+			$(ComputeCompileInputsTargets);
+			ComputeDASMOutput;
+		</ComputeCompileInputsTargets>
+	</PropertyGroup>
+	<UsingTask TaskName="DASM" TaskFactory="XamlTaskFactory" AssemblyName="Microsoft.Build.Tasks.v4.0">
+		<Task>$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml</Task>
+	</UsingTask>
+	<Target
+		  Name="_DASM"
+		  BeforeTargets="$(DASMBeforeTargets)"
+		  AfterTargets="$(DASMAfterTargets)"
+		  Condition="'@(DASM)' != ''"
+		  Outputs="@(DASM-&gt;Metadata('OutputFile') -&gt;Distinct())"
+		  Inputs="@(DASM);@(DASM-&gt;'%(AdditionalDependencies)');$(MSBuildProjectFile)"
+		  DependsOnTargets="$(DASMDependsOn)">
+		<ItemGroup Condition="'@(SelectedFiles)' != ''">
+			<DASM Remove="@(DASM)" Condition="'%(Identity)' != '@(SelectedFiles)'" />
+		</ItemGroup>
+		<ItemGroup>
+			<DASM_tlog Include="%(DASM.OutputFile)" Condition="'%(DASM.OutputFile)' != '' and '%(DASM.ExcludedFromBuild)' != 'true'">
+				<Source>@(DASM, '|')</Source>
+			</DASM_tlog>
+		</ItemGroup>
+		<Message
+			  Importance="High"
+			  Text="%(DASM.ExecutionDescription)" />
+		<WriteLinesToFile
+			  Condition="'@(DASM_tlog)' != '' and '%(DASM_tlog.ExcludedFromBuild)' != 'true'"
+			  File="$(TLogLocation)$(ProjectName).write.1.tlog"
+			  Lines="^%(DASM_tlog.Source);@(DASM_tlog-&gt;'%(Fullpath)')" />
+		<DASM
+			  Condition="'@(DASM)' != '' and '%(DASM.ExcludedFromBuild)' != 'true'"
+			  CommandLineTemplate="%(DASM.CommandLineTemplate)"
+			  IncludePaths="%(DASM.IncludePaths)"
+			  Defines="%(DASM.Defines)"
+			  UnDefines="%(DASM.UnDefines)"
+			  OutputFile="%(DASM.OutputFile)"
+			  CommentType="%(DASM.CommentType)"
+			  ShowMacroExpansion="%(DASM.ShowMacroExpansion)"
+			  NoLineNumbers="%(DASM.NoLineNumbers)"
+			  FlushLines="%(DASM.FlushLines)"
+			  AdditionalOptions="%(DASM.AdditionalOptions)"
+			  Inputs="@(DASM)" />
+	</Target>
+	<Target Name="ComputeDASMOutput" Condition="'@(DASM)' != ''">
+		<ItemGroup>
+			<ClInclude Include="%(DASM.OutputFile)" Condition="'%(DASM.ExcludedFromBuild)' != 'true'" />
+		</ItemGroup>
+	</Target>
+</Project>

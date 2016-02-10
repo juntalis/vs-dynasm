@@ -1,0 +1,21 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="VSDynASM.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="LuaExecutable" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">minilua.exe</Value>
+    </Setting>
+    <Setting Name="DynAsmDir" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">luajit\dynasm</Value>
+    </Setting>
+    <Setting Name="DynAsmScript" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">dynasm.lua</Value>
+    </Setting>
+    <Setting Name="DebugEnvVar" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">VSDYNASM_DEBUG</Value>
+    </Setting>
+    <Setting Name="FlagsEnvVar" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">DYNASM_FLAGS</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

@@ -1,0 +1,55 @@
+diff --git a/dynasm/dynasm.lua b/dynasm/dynasm.lua
+index 145fb0c..774c3a6 100644
+--- a/dynasm/dynasm.lua
++++ b/dynasm/dynasm.lua
+@@ -1087,6 +1087,50 @@ if arg and arg[0] then
+   if package and prefix then package.path = prefix.."?.lua;"..package.path end
+ end
+ 
++------------------------------------------------------------------------------
++-- START DASM_CONTRIB MODIFICATIONS
++--
++-- In order to get our extensions into DynASM, we'll need hijack the process
++-- a bit.
++------------------------------------------------------------------------------
++
++-- Contains our dasm_contrib module
++local g_contrib, g_archname
++local _loadarch = loadarch
++
++-- Update dasm_contrib's environment to match DynASM's.
++local function syncext(m_contrib, arch)
++  g_archname = arch
++  m_contrib.passcb(wline, werror, wfatal, wwarn, wflush)
++  m_contrib.setup(arch, g_opt, map_def, map_op)
++  map_op, map_coreop = m_contrib.mergeall(map_op, map_coreop, opt_map)
++end
++
++-- Load DynASM extensions from dasm_contrib.lua. loadext is just a slightly
++-- modified version of dynasm's loadarch function.
++local function installext(_L)
++  local ok, m_contrib = pcall(require, 'dasm_contrib')
++  if not ok then return 'cannot load module: dasm_contrib' end
++  g_contrib = m_contrib
++  syncext(m_contrib, g_archname)
++end
++
++-- Hijack DynASM's loadarch handler with our own implementation. This just
++-- wraps the original so that it can update dasm_contrib as DynASM's
++-- environment changes. (current arch, options, etc)
++loadarch = function(arch)
++  local err = _loadarch(arch)
++  if err then return err end
++  syncext(g_contrib, arch)
++end
++
++-- Finally, load the dasm_contrib module
++installext(_G)
++
++------------------------------------------------------------------------------
++-- END DASM_CONTRIB MODIFICATIONS
++------------------------------------------------------------------------------
++
+ -- Start DynASM.
+ parseargs{...}
+ 

@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup Condition="'$(DASMBeforeTargets)' == '' and '$(DASMAfterTargets)' == '' and '$(ConfigurationType)' != 'Makefile'">
+		<DASMBeforeTargets>ClCompile</DASMBeforeTargets>
+	</PropertyGroup>
+	<PropertyGroup>
+		<DASMDependsOn Condition="'$(ConfigurationType)' != 'Makefile'">_SelectedFiles;$(DASMDependsOn)</DASMDependsOn>
+	</PropertyGroup>
+	<PropertyGroup>
+		<!-- The LUA executable to use for running DynASM -->
+		<DASMLuaPath Condition="'$(DASMLuaPath)' == ''">$(MSBuildThisFileDirectory)bin\minilua.exe</DASMLuaPath>
+		
+		<!-- If you want to use vsdynasm instead, uncomment the line below. We'll still need the DynASMDir variable if you want the "include" directory automatically added, though. -->
+		<!-- <VsDynASMPath Condition="'$(VsDynASMPath)' == ''">$(MSBuildThisFileDirectory)bin\vsdynasm.exe</VsDynASMPath> -->
+		
+		<!-- If $(DynASMPath) is defined but $(DynASMDir) is not, use the parent of $(DynASMPath) for $(DynASMDir) -->
+		<DynASMDir Condition="'$(DynASMPath)' != '' And '$(DynASMDir)' == ''">$([System.IO.Path]::GetDirectoryName($(DynASMPath)))</DynASMDir>
+		
+		<!-- Otherwise, default $(DynASMDir) to thisDir\luajit\dynasm -->
+		<DynASMDir Condition="'$(DynASMDir)' == ''">$(MSBuildThisFileDirectory)luajit\dynasm</DynASMDir>
+		
+		<!-- And $(DynASMPath) to $(DynASMDir)\dynasm.lua -->
+		<DynASMPath Condition="'$(DynASMPath)' == ''">$(DynASMDir)\dynasm.lua</DynASMPath>
+		
+		<!-- If $(VsDynASMPath) is defined, we quote and use it. If not, we use: "$(DASMLuaPath)" "$(DynASMPath)" -->
+		<DASMCmdLine Condition="'$(VsDynASMPath)' != ''">"$(VsDynASMPath)"</DASMCmdLine>
+		<DASMCmdLine Condition="'$(DASMCmdLine)' == ''">"$(DASMLuaPath)" "$(DynASMPath)"</DASMCmdLine>
+	</PropertyGroup>
+	<ItemDefinitionGroup>
+		<DASM>
+			<CommentType>CComment</CommentType>
+			<ShowMacroExpansion>false</ShowMacroExpansion>
+			<NoLineNumbers>false</NoLineNumbers>
+			<FlushLines>false</FlushLines>
+			<CommandLineTemplate>$(DASMCmdLine) [AllOptions] [AdditionalOptions] [Inputs]</CommandLineTemplate>
+			<OutputFile>%(RelativeDir)%(FileName).inl</OutputFile>
+			<ExecutionDescription>Pre-assembling code from %(Identity) with dynasm...</ExecutionDescription>
+			<ShowOnlyRuleProperties>false</ShowOnlyRuleProperties>
+		</DASM>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup>
+		<ClCompile>
+			<!-- DynASM directory is added to the MSVC compiler's include directories as long as $(DynASMDir) points to an existing directory -->
+			<AdditionalIncludeDirectories Condition="'$(DynASMDir)' != '' And Exists('$(DynASMDir)')">$(DynASMDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ClCompile>
+	</ItemDefinitionGroup>
+</Project>
